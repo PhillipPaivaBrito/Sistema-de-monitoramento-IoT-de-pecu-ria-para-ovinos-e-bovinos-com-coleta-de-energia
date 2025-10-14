@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "cmath": "cpp"
+    },
+    "idf.pythonInstallPath": "C:\\Espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "vsmqtt.brokerProfiles": [
+        {
+            "name": "gpstracker",
+            "host": "localhost",
+            "port": 1883,
+            "clientId": "vsmqtt_client_c83d"
+        }
+    ]
+}

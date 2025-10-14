@@ -1,0 +1,815 @@
+[
+    {
+        "id": "41f05514e7e9b379",
+        "type": "tab",
+        "label": "83852905083080",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "6213541467bb78f4",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "IMU data",
+        "func": "\n// Assume que msg.payload contém a string completa com os separadores '^'\n// Ex: \"27.00 -0.05 ... 1.74^27.05 -0.05 ... 1.87^27.05 -0.05 ... 1.80\"\nconst fullImuDataString = msg.payload.trim();\n\n// Remove o prefixo \"GPS: \" se ele estiver presente\nconst cleanedGpsDataString = fullImuDataString.replace(\"IMU: \", \"\").trim();\n\n// Primeiro, divida a string pelas leituras de IMU usando o '\\n' como delimitador\nconst individualReadingStrings = fullImuDataString.split(\"\\n\");\n\nconst NUM_VALUES_PER_READING = 9; // 9 valores por cada leitura de IMU (temp, accX, etc.)\nvar messagesToSend = []; // Array para armazenar as mensagens que serão enviadas\n\n// Itera sobre cada string de leitura individual\nfor (const readingString of individualReadingStrings) {\n    if (readingString.trim() === \"\") {\n        // Ignora strings vazias que podem surgir de separadores extras\n        continue;\n    }\n\n    // Divide cada string de leitura em um array de números (usando espaço como delimitador)\n    const dataArray = readingString.trim().split(\" \");\n\n    // Verifica se temos o número correto de valores antes de processar\n    if (dataArray.length === NUM_VALUES_PER_READING) {\n        // Cria o objeto para esta leitura\n        const imuObject = {\n            temp: parseFloat(dataArray[0]),\n            accX: parseFloat(dataArray[1]),\n            accY: parseFloat(dataArray[2]),\n            accZ: parseFloat(dataArray[3]),\n            gyroX: parseFloat(dataArray[4]),\n            gyroY: parseFloat(dataArray[5]),\n            gyroZ: parseFloat(dataArray[6]),\n            accAngleX: parseFloat(dataArray[7]),\n            accAngleY: parseFloat(dataArray[8])//,\n            //accAngleZ: parseFloat(dataArray[9])\n        };\n\n        // Adiciona a nova mensagem (com o objeto IMU no payload) ao array de mensagens\n        messagesToSend.push({ payload: imuObject });\n    } else {\n        // Este warn é o que você está vendo agora, porque a string inteira está sendo passada para esta parte do código\n        node.warn(`Leitura do IMU com número de valores inesperado: ${readingString}`);\n    }\n}\nmsg.topic = \"IMU\"\n// Retorna um array de mensagens. O Node-RED enviará cada mensagem sequencialmente.\n// Isso fará com que o gráfico e os outros nós recebam cada leitura IMU individualmente.\nreturn [messagesToSend[0], messagesToSend[1], messagesToSend[2]];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 320,
+        "wires": [
+            [
+                "d6b96449f7bc7d22",
+                "eea512efc95a870c",
+                "dd6899a473ff09dc",
+                "fb7acbb7eb6de5e8",
+                "c0ae7a046811381d",
+                "baa16bae5ca0cc95",
+                "5c1b31f6bd80866a",
+                "8bec5adba06fe94b",
+                "0ae4eeaaf2474f90"
+            ],
+            [
+                "19be071d19762875"
+            ],
+            [
+                "c4396bccfd06c222"
+            ]
+        ]
+    },
+    {
+        "id": "fc35075e473a8033",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "gps data",
+        "func": "// Assume que msg.payload contém a string \"0.000000 0.000000 0.00 0.00 0.00\"\nconst gpsDataString = msg.payload;\n\n// Remove o prefixo \"GPS: \" se ele estiver presente\nconst cleanedGpsDataString = gpsDataString.replace(\"GPS: \", \"\").trim();\n\n// Divide a string em um array de strings usando o espaço como delimitador\nconst dataArray = cleanedGpsDataString.split(\" \");\n\n// Converte os elementos do array para números e atribui a variáveis ou um objeto\nconst latitude = parseFloat(dataArray[0]);\nconst longitude = parseFloat(dataArray[1]);\nconst altitude = parseFloat(dataArray[2]);\nconst degree = parseFloat(dataArray[3]);\nconst speed = parseFloat(dataArray[4]);\n\nif(latitude!=0 && longitude!=0){\n    // Cria um novo objeto no payload com os dados separados\n    msg.payload = {\n        \"draggable\": false,\n        \"name\" : msg.id,\n        \"lat\": latitude,\n        \"lon\": longitude,\n        \"alt\":altitude,\n        \"icon\": \"locate\" ,\n        \"radius\":7,\n        \"color\":'#000000',\n        //\"opacity\":10,\n        \"fillColor\":'#3d00f5',\n        //\"fillOpacity\":10,\n        \"command\":{\n            \"zoon\":5,\n            \"lat\":latitude,\n            \"lon\":longitude\n        }\n    };\n    node.send([{ payload: msg.payload }, { payload: altitude }, { payload: speed }, { payload: degree }]);\n}",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 180,
+        "wires": [
+            [
+                "c0c1081e7a03cca9",
+                "09f5fb02f16c788e"
+            ],
+            [
+                "396349fb59eb5781"
+            ],
+            [
+                "b1aadd662d7e1f4c"
+            ],
+            [
+                "b6945ea10cdc10b8"
+            ]
+        ]
+    },
+    {
+        "id": "19be071d19762875",
+        "type": "delay",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "500",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 660,
+        "y": 340,
+        "wires": [
+            [
+                "d6b96449f7bc7d22",
+                "eea512efc95a870c",
+                "dd6899a473ff09dc",
+                "fb7acbb7eb6de5e8",
+                "c0ae7a046811381d",
+                "baa16bae5ca0cc95",
+                "5c1b31f6bd80866a",
+                "8bec5adba06fe94b",
+                "0ae4eeaaf2474f90"
+            ]
+        ]
+    },
+    {
+        "id": "c4396bccfd06c222",
+        "type": "delay",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1000",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 660,
+        "y": 380,
+        "wires": [
+            [
+                "d6b96449f7bc7d22",
+                "eea512efc95a870c",
+                "0ae4eeaaf2474f90",
+                "fb7acbb7eb6de5e8",
+                "c0ae7a046811381d",
+                "baa16bae5ca0cc95",
+                "5c1b31f6bd80866a",
+                "8bec5adba06fe94b",
+                "dd6899a473ff09dc"
+            ]
+        ]
+    },
+    {
+        "id": "d6b96449f7bc7d22",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "gyroX",
+        "func": "msg.topic = \"gyroX\"\nmsg.payload = msg.payload.gyroX;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 440,
+        "wires": [
+            [
+                "e4f6655f2e286793"
+            ]
+        ]
+    },
+    {
+        "id": "8265f84c55fda703",
+        "type": "ui_chart",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "group": "11f60c6e1aae46b5",
+        "order": 1,
+        "width": 6,
+        "height": 7,
+        "label": "acc",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm",
+        "interpolate": "linear",
+        "nodata": "aguardando dados",
+        "dot": false,
+        "ymin": "-2",
+        "ymax": "2",
+        "removeOlder": "1",
+        "removeOlderPoints": "18000",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1290,
+        "y": 360,
+        "wires": [
+            []
+        ],
+        "inputLabels": [
+            "time"
+        ],
+        "outputLabels": [
+            "value"
+        ]
+    },
+    {
+        "id": "baa16bae5ca0cc95",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "gyroZ",
+        "func": "msg.topic = \"gyroZ\"\nmsg.payload = msg.payload.gyroZ;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 520,
+        "wires": [
+            [
+                "e4f6655f2e286793"
+            ]
+        ]
+    },
+    {
+        "id": "fb7acbb7eb6de5e8",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "accZ",
+        "func": "msg.topic = \"accZ\"\nmsg.payload = msg.payload.accZ;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 400,
+        "wires": [
+            [
+                "8265f84c55fda703"
+            ]
+        ]
+    },
+    {
+        "id": "c0ae7a046811381d",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "gyroY",
+        "func": "msg.topic = \"gyroY\"\nmsg.payload = msg.payload.gyroY;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 480,
+        "wires": [
+            [
+                "e4f6655f2e286793"
+            ]
+        ]
+    },
+    {
+        "id": "8bec5adba06fe94b",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "accAngleY",
+        "func": "msg.topic = \"accAngleY\"\nmsg.payload = msg.payload.accAngleY;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 600,
+        "wires": [
+            [
+                "e4f6655f2e286793"
+            ]
+        ]
+    },
+    {
+        "id": "dd6899a473ff09dc",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "accX",
+        "func": "msg.topic = \"accX\"\nmsg.payload = msg.payload.accX;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 320,
+        "wires": [
+            [
+                "8265f84c55fda703"
+            ]
+        ]
+    },
+    {
+        "id": "eea512efc95a870c",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "temp",
+        "func": "msg.topic = \"temp\"\nmsg.payload = msg.payload.temp;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 280,
+        "wires": [
+            [
+                "d172d2b7bde9c624"
+            ]
+        ]
+    },
+    {
+        "id": "0ae4eeaaf2474f90",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "accY",
+        "func": "msg.topic = \"accY\"\nmsg.payload = msg.payload.accY;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 360,
+        "wires": [
+            [
+                "8265f84c55fda703"
+            ]
+        ]
+    },
+    {
+        "id": "5c1b31f6bd80866a",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "accAngleX",
+        "func": "msg.topic = \"accAngleX\"\nmsg.payload = msg.payload.accAngleX;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 560,
+        "wires": [
+            [
+                "e4f6655f2e286793"
+            ]
+        ]
+    },
+    {
+        "id": "c802e54636242510",
+        "type": "ui_button",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "group": "11f60c6e1aae46b5",
+        "order": 8,
+        "width": 13,
+        "height": 1,
+        "passthru": false,
+        "label": "limpar",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "--",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 950,
+        "y": 40,
+        "wires": [
+            [
+                "8265f84c55fda703",
+                "e4f6655f2e286793",
+                "d172d2b7bde9c624",
+                "b1aadd662d7e1f4c",
+                "396349fb59eb5781",
+                "b6945ea10cdc10b8"
+            ]
+        ]
+    },
+    {
+        "id": "d172d2b7bde9c624",
+        "type": "ui_gauge",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "group": "11f60c6e1aae46b5",
+        "order": 3,
+        "width": 4,
+        "height": 3,
+        "gtype": "donut",
+        "title": "temperatura",
+        "label": "grausº",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "30",
+        "seg2": "45",
+        "diff": false,
+        "className": "",
+        "x": 1270,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "e4f6655f2e286793",
+        "type": "ui_chart",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "group": "11f60c6e1aae46b5",
+        "order": 2,
+        "width": 7,
+        "height": 7,
+        "label": "gyro",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm",
+        "interpolate": "linear",
+        "nodata": "aguardando dados",
+        "dot": false,
+        "ymin": "-360",
+        "ymax": "360",
+        "removeOlder": "1",
+        "removeOlderPoints": "18000",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1290,
+        "y": 440,
+        "wires": [
+            []
+        ],
+        "inputLabels": [
+            "time"
+        ]
+    },
+    {
+        "id": "09f5fb02f16c788e",
+        "type": "ui_worldmap",
+        "z": "41f05514e7e9b379",
+        "group": "11f60c6e1aae46b5",
+        "order": 4,
+        "width": 11,
+        "height": 8,
+        "name": "maps",
+        "lat": "",
+        "lon": "",
+        "zoom": "",
+        "layer": "OSMC",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "hide",
+        "panit": "true",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "deg",
+        "showgrid": "false",
+        "showruler": "true",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 710,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "b1aadd662d7e1f4c",
+        "type": "ui_gauge",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "group": "11f60c6e1aae46b5",
+        "order": 5,
+        "width": 4,
+        "height": 3,
+        "gtype": "gage",
+        "title": "velocidade",
+        "label": "m/s",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "20",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "5",
+        "seg2": "15",
+        "diff": false,
+        "className": "",
+        "x": 810,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "396349fb59eb5781",
+        "type": "ui_text",
+        "z": "41f05514e7e9b379",
+        "group": "11f60c6e1aae46b5",
+        "order": 6,
+        "width": 2,
+        "height": 2,
+        "name": "",
+        "label": "altitude",
+        "format": "{{msg.payload}}m",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 800,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "c0c1081e7a03cca9",
+        "type": "worldmap-tracks",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "depth": "15",
+        "layer": "single",
+        "smooth": false,
+        "x": 570,
+        "y": 100,
+        "wires": [
+            [
+                "09f5fb02f16c788e"
+            ]
+        ]
+    },
+    {
+        "id": "c09fbb0cfe263f6f",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "data split",
+        "func": "// Se msg.payload já é um objeto:\nlet data = msg.payload;\n\n// Se ainda quiser garantir, pode testar:\nif (typeof data === \"string\") {\n    try {\n        data = JSON.parse(data);\n    } catch(e) {\n        node.error(\"JSON inválido\", msg);\n        return [null, null];\n    }\n}\n\n// Restaura as quebras de linha no campo imu\nif (data.imu) {\n    data.imu = data.imu.replace(/\\/n/g, '\\n');\n}\n\nlet msg_gps = { payload: data.gps, id: data.id };\nlet msg_imu = { payload: data.imu, id: data.id };\n\nreturn [msg_gps, msg_imu];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 260,
+        "wires": [
+            [
+                "fc35075e473a8033"
+            ],
+            [
+                "6213541467bb78f4",
+                "7e0ad770be2f7f73"
+            ]
+        ]
+    },
+    {
+        "id": "e24e456393ab201d",
+        "type": "mqtt in",
+        "z": "41f05514e7e9b379",
+        "name": "",
+        "topic": "83852905083080",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "555eeed952c87a07",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 260,
+        "wires": [
+            [
+                "c09fbb0cfe263f6f",
+                "18a494f770a631b5"
+            ]
+        ]
+    },
+    {
+        "id": "b6945ea10cdc10b8",
+        "type": "ui_text",
+        "z": "41f05514e7e9b379",
+        "group": "11f60c6e1aae46b5",
+        "order": 7,
+        "width": 2,
+        "height": 2,
+        "name": "",
+        "label": "direção",
+        "format": "{{msg.payload}}º",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 800,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3313443925d1f51a",
+        "type": "ui_toast",
+        "z": "41f05514e7e9b379",
+        "position": "top right",
+        "displayTime": "240",
+        "highlight": "#FF0000",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 750,
+        "y": 600,
+        "wires": [],
+        "icon": "node-red/alert.svg"
+    },
+    {
+        "id": "7e0ad770be2f7f73",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "calculo de variancia",
+        "func": "// Verifica se a mensagem de reset foi enviada\nif (msg.payload.reset === true) {\n    flow.set('allDataArrays', null);\n    //node.warn(\"Histórico de variância resetado.\");\n    return null; // Encerra a execução para mensagens de reset\n}\n\n// A partir daqui, a lógica assume que msg.payload é uma string (dados do IMU)\n// Se msg.payload não for uma string, o código irá parar.\nif (typeof msg.payload !== 'string') {\n    node.error(\"Erro: msg.payload não é uma string. Não foi possível calcular a variância.\");\n    return null;\n}\n\n// A variável ID já está sendo capturada do nó anterior\nvar ID = msg.id;\n\n// Assume que msg.payload é uma string com os dados do IMU\nconst fullImuDataString = msg.payload.trim();\n\n// Divide a string pelas leituras de IMU usando o '\\n' como delimitador\nconst individualReadingStrings = fullImuDataString.split(\"\\n\");\n\nconst NUM_VALUES_PER_READING = 9;\nvar messagesToSend = [];\n\nconst maxArraySize = 12;\n\nlet allDataArrays = flow.get('allDataArrays') || {};\nconst variables = ['temp', 'accX', 'accY', 'accZ', 'gyroX', 'gyroY', 'gyroZ', 'accAngleX', 'accAngleY'];\nvariables.forEach(v => {\n    if (!allDataArrays[v]) {\n        allDataArrays[v] = [];\n    }\n});\n\nfor (const readingString of individualReadingStrings) {\n    if (readingString.trim() === \"\") {\n        continue;\n    }\n\n    const dataArray = readingString.trim().split(\" \");\n\n    if (dataArray.length === NUM_VALUES_PER_READING) {\n        const imuObject = {\n            temp: parseFloat(dataArray[0]),\n            accX: parseFloat(dataArray[1]),\n            accY: parseFloat(dataArray[2]),\n            accZ: parseFloat(dataArray[3]),\n            gyroX: parseFloat(dataArray[4]),\n            gyroY: parseFloat(dataArray[5]),\n            gyroZ: parseFloat(dataArray[6]),\n            accAngleX: parseFloat(dataArray[7]),\n            accAngleY: parseFloat(dataArray[8])\n        };\n\n        variables.forEach(v => {\n            allDataArrays[v].push(imuObject[v]);\n        });\n        \n        messagesToSend.push({ payload: imuObject });\n    } else {\n        node.warn(`Leitura do IMU com número de valores inesperado: ${readingString}`);\n    }\n}\n\nvariables.forEach(v => {\n    if (allDataArrays[v].length > maxArraySize) {\n        allDataArrays[v].shift();\n    }\n});\n\nflow.set('allDataArrays', allDataArrays);\n\nfunction calculateVariance(data) {\n    if (!data || data.length < 2) {\n        return 0;\n    }\n    const mean = data.reduce((acc, val) => acc + val, 0) / data.length;\n    const sumOfSquares = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0);\n    return sumOfSquares / (data.length - 1);\n}\n\nconst allVariances = {};\nvariables.forEach(v => {\n    allVariances[v] = calculateVariance(allDataArrays[v]);\n});\n\nconst lastMessage = messagesToSend[messagesToSend.length - 1];\nif (lastMessage) {\n    lastMessage.variances = allVariances;\n    lastMessage.id = ID;\n}\n\nmsg.topic = \"IMU\";\n\nreturn [lastMessage];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 440,
+        "wires": [
+            [
+                "82efcf58e30bd6e4"
+            ]
+        ]
+    },
+    {
+        "id": "82efcf58e30bd6e4",
+        "type": "function",
+        "z": "41f05514e7e9b379",
+        "name": "thresholds",
+        "func": "const variances = msg.variances;\nconst ID = msg.id;\n\n// Defina os limites de variância para cada variável.\n// Você pode ajustar esses valores conforme necessário.\nconst thresholds = {\n    temp: 10.005,\n    accX: 1.505,\n    accY: 1.505,\n    accZ: 2.005,\n    gyroX: 30000.05,\n    gyroY: 30000.05,\n    gyroZ: 30000.05,\n    accAngleX: 100.005,\n    accAngleY: 100.005\n};\n\nlet alertMessages = [];\n\n// Itera sobre cada variável e verifica se a variância está acima do limite\nfor (const key in variances) {\n    if (variances.hasOwnProperty(key) && variances[key] > thresholds[key]) {\n        alertMessages.push(` - ${key}: ${variances[key].toFixed(4)}`);\n    }\n}\n\n// Se alguma variância estiver alta, constrói a mensagem de alerta\nif (alertMessages.length > 0) {\n    // Adiciona o ID no início da mensagem\n    msg.payload = `Dispositivo ${ID} - Alta Variância Detectada:\\n${alertMessages.join('\\n')}`;\n    return msg;\n}\n\n// Se nenhuma variância estiver alta, não envia nada\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 540,
+        "wires": [
+            [
+                "3313443925d1f51a",
+                "673c3100c9b7cd5d"
+            ]
+        ]
+    },
+    {
+        "id": "2f7125903207e9d6",
+        "type": "inject",
+        "z": "41f05514e7e9b379",
+        "name": "Resetar Variância",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "240",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"reset\": true}",
+        "payloadType": "json",
+        "x": 170,
+        "y": 480,
+        "wires": [
+            [
+                "7e0ad770be2f7f73"
+            ]
+        ]
+    },
+    {
+        "id": "18a494f770a631b5",
+        "type": "debug",
+        "z": "41f05514e7e9b379",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 290,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "673c3100c9b7cd5d",
+        "type": "debug",
+        "z": "41f05514e7e9b379",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "11f60c6e1aae46b5",
+        "type": "ui_group",
+        "name": "tracker",
+        "tab": "f74a3a91e0266697",
+        "order": 1,
+        "disp": true,
+        "width": 28,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "555eeed952c87a07",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.137.1",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "f74a3a91e0266697",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
