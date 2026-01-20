@@ -1,3 +1,13 @@
 # Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia
-Meu TCC
-informações sobre a instalação em breve
+  Esse repositorio existe apenas para mostrar o desenvolvimento do meu Trabalho de conclusão em curso em engenharia da computação, o codigo não tera atualizações futuras aqui, caso queira ver atualizações entrar em contato para acessar o repositorio principal.
+  
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Projeto%20na%20Protoboard.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Projeto%20da%20placa%20no%20Kicad.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Placa%20de%20circuito%20impresso.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Parte%20inferior%20com%20painel.jpg)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Face%20superior%20da%20PCB.jpg)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Fluxograma%20do%20transmissor%20e%20do%20receptor.jpg)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Fluxograma%20do%20software%20do%20transmissor.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Fluxograma%20do%20transmissor%20e%20do%20receptor.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Implementa%C3%A7%C3%A3o%20do%20Node%20RED.png)
+![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Painel%20do%20dashboard.png)
