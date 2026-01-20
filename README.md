@@ -12,6 +12,8 @@ Caso queira testar o dashboard, você precisara instalar o NodeRed(https://noder
 
 O broker que utilizei foi o mosquitto(https://mosquitto.org/) que é open source, porém qualquer broker pode ser utilizado desde que seja configurado corretamente.
 
+Para informações adicionais, consulte o PDF do TCC.
+
 A seguir estão imagens do desenvolvimento do hardware transmissor.
 ![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Projeto%20na%20Protoboard.png)
 ![image alt](https://github.com/PhillipPaivaBrito/Sistema-de-monitoramento-IoT-de-pecu-ria-para-ovinos-e-bovinos-com-coleta-de-energia/blob/39e89aaf3d64fe7e2538c85453d5e34461b347c1/imagens/Projeto%20da%20placa%20no%20Kicad.png)
